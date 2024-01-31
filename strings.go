@@ -170,13 +170,22 @@ func UnwrapFold(s, prefix, suffix string) (string, bool) {
 	return s[len(prefix) : len(s)-len(suffix)], true
 }
 
-// UnquoteSingle removes single quotes around s and returns it and true on 
+// UnquoteSingle removes single quotes around s and returns it and true on
 // success. If either leading or trailing quote is not found result is s, false.
 func UnquoteSingle(s string) (string, bool) { return Unwrap(s, "'", "'") }
 
-// UnquoteDouble removes double quotes around s and returns it and true on 
+// UnquoteDouble removes double quotes around s and returns it and true on
 // success. If either leading or trailing quote is not found result is s, false.
 func UnquoteDouble(s string) (string, bool) { return Unwrap(s, "\"", "\"") }
+
+// Wrap wraps s within prefix and suffix.
+func Wrap(s, prefix, suffix string) string { return prefix + s + suffix }
+
+// QuoteSingle wraps s with single quotes.
+func QuoteSingle(s string) string { return Wrap(s, "'", "'") }
+
+// QuoteDouble wraps s with double quotes.
+func QuoteDouble(s string) string { return Wrap(s, "\"", "\"") }
 
 // Matches "text" against "pattern". Case insensitive. Returns truth.
 // * matches any number of characters.
