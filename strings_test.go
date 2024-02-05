@@ -60,6 +60,26 @@ func TestStringFunctions(t *testing.T) {
 	if MatchesWildcard("ThisIsWrong", "?hi*IswrongO") {
 		t.Error("MatchesWildcard() failed")
 	}
+
+	if segment, next := Segment("sinferopopokatepetl", "notfound", 0); segment != "sinferopopokatepetl" || next != -1 {
+		t.Fatal("Segment failed")
+	}
+	if segment, next := Segment("sinferopopokatepetl", "notfound", 7); segment != "popokatepetl" || next != -1 {
+		t.Fatal("Segment failed")
+	}
+	if segment, next := Segment("sinferopopokatepetl", "popo", 0); segment != "sinfero" || next != 11 {
+		t.Fatal("Segment failed")
+	}
+	if segment, next := Segment("sinferopopokatepetl", "te", 11); segment != "ka" || next != 15 {
+		t.Fatal("Segment failed")
+	}
+	if segment, next := Segment("sinferopopokatepetl", "pe", 15); segment != "tl" || next != 19 {
+		t.Fatal("Segment failed")
+	}
+
+	if segment, next := SegmentFold("sinferopopokatepetl", "pOpO", 0); segment != "sinfero" || next != 11 {
+		t.Fatal("Segment failed")
+	}
 }
 
 func TestAsciiFunctions(t *testing.T) {
@@ -111,4 +131,3 @@ func BenchmarkRandomString(b *testing.B) {
 		RandomString(true, true, true, 10)
 	}
 }
-

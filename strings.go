@@ -71,6 +71,12 @@ func HasSuffixFold(s, suffix string) bool {
 	return strings.HasSuffix(strings.ToLower(s), strings.ToLower(suffix))
 }
 
+// IndexFold returns the index of the first instance of substr in s, or -1 if
+// substr is not present in s. Search is case-insensitive.
+func IndexFold(s, substr string) int {
+	return strings.Index(strings.ToLower(s), strings.ToLower(substr))
+}
+
 // primeRK is the prime base used in Rabin-Karp algorithm.
 const primeRK = 16777619
 
@@ -236,4 +242,51 @@ func MatchesWildcard(text, pattern string) bool {
 	}
 
 	return iw == len(w)
+}
+
+// Segment returns the word up to the next separator and index of s just after
+// the separator. Scan of s starts at start index.
+//
+// If sep was not found returns s starting at start and -1.
+// If the end of s was reached resulting next will be -1.
+// Returns an empty string and -1 if start is out of range or sep is empty.
+func Segment(s, sep string, start int) (segment string, next int) {
+	if len(s) == 0 || start < 0 || start > len(s)-1 {
+		return "", -1
+	}
+	var end = strings.Index(s[start:], sep)
+	if end == -1 {
+		return s[start:], -1
+	}
+	if end == 0 {
+		start = start + len(sep)
+		end = start + end
+		if start+len(sep) > len(s) {
+			return s[start : start+len(sep)], -1
+		}
+		return s[start : start+len(sep)], start + len(sep)
+	}
+	end = start + end
+	return s[start:end], end + len(sep)
+}
+
+// SegmentFold is the case-insensitive version of Segment.
+func SegmentFold(s, sep string, start int) (segment string, next int) {
+	if len(s) == 0 || start < 0 || start > len(s)-1 {
+		return "", -1
+	}
+	var end = IndexFold(s[start:], sep)
+	if end == -1 {
+		return s[start:], -1
+	}
+	if end == 0 {
+		start = start + len(sep)
+		end = start + end
+		if start+len(sep) > len(s) {
+			return s[start : start+len(sep)], -1
+		}
+		return s[start : start+len(sep)], start + len(sep)
+	}
+	end = start + end
+	return s[start:end], end + len(sep)
 }
