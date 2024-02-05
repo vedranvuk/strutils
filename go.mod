@@ -1,3 +1,3 @@
-module github.com/vedranvuk/strutil
+module github.com/vedranvuk/strutils
 
 go 1.21.6
