@@ -1,6 +1,6 @@
 # strings
 
-Additional string parsing functions for golang.
+Additional string parsing and manipulation functions for Go.
 
 Rewrite of [github.com/vedranvuk/strings](https://github.com/vedranvuk/strings).
 
