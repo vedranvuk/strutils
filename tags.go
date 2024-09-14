@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// TagKey is a recognized key in a set of key=value pairs parsed 
+// TagKey is a recognized key in a set of key=value pairs parsed
 // from a raw tag value.
 //
 // In struct tags:  `TagName:"TagKey=somevalue"`
@@ -196,6 +196,7 @@ func (self *Tag) ParseDocs(docs []string) (err error) {
 			continue
 		}
 		line = strings.TrimPrefix(line, tagPrefix)
+		line, _ = UnquoteDouble(line)
 		for _, token := range strings.Split(line, ",") {
 			if token = strings.TrimSpace(token); token == "" {
 				continue
