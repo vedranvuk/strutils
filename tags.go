@@ -191,7 +191,7 @@ func (self *Tag) ParseDocs(docs []string) (err error) {
 
 	var tagPrefix = self.TagName + ":"
 	for _, line := range docs {
-		line = strings.TrimPrefix(strings.TrimSpace(line), "//")
+		line = strings.TrimSpace(strings.TrimPrefix(line, "//"))
 		if !strings.HasPrefix(line, tagPrefix) {
 			continue
 		}
