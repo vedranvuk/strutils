@@ -18,33 +18,32 @@ type TagKey = string
 //
 // Given:
 //
-// 	const TagName = "mytag"
+//	const TagName = "mytag"
 //
 // both the
 //
-//  structTag = `json:"omitempty" MyTag:"key1,key2=value1,key2=value2,key3"`
+//	structTag = `json:"omitempty" MyTag:"key1,key2=value1,key2=value2,key3"`
 //
 // and
 //
-//  goDocLine = //myTag:"key1,key2=value1,key2=value2,key3"
+//	goDocLine = //myTag:"key1,key2=value1,key2=value2,key3"
 //
 // Results in the following:
 //
-// 	Values{
-//		"key1": nil,
-//		"key2": []string{
-//			"value1",
-//			"value2",
-//      }
-// 		"key3": nil,
-// 	}
+//		Values{
+//			"key1": nil,
+//			"key2": []string{
+//				"value1",
+//				"value2",
+//	     }
+//			"key3": nil,
+//		}
 //
-// 
 // Contents of the quoted string following "MyTag:" are parsed as input which
 // has following rules:
-// 
+//
 // Keys may appear without values or in key=value format. Multiple keys or pairs
-// are separated by a comma. Values may not contain commas or  double quotes. 
+// are separated by a comma. Values may not contain commas or  double quotes.
 // Space is trimmed from any pair values. Specifying a pair with the same key
 // multiple times adds values to an entry under key in parsed [Values].
 //
@@ -52,9 +51,9 @@ type TagKey = string
 type Values map[TagKey][]string
 
 // Add appends values to value slice under key.
-// 
-// If no values exist under key a new entry is added. If no values were 
-// specified target slice is unmodified. Initial value of an empty entry is 
+//
+// If no values exist under key a new entry is added. If no values were
+// specified target slice is unmodified. Initial value of an empty entry is
 // a nil slice.
 func (self Values) Add(key string, values ...string) {
 	if s, exists := self[key]; exists {
@@ -84,6 +83,9 @@ func (self Values) First(key string) (s string) {
 	}
 	return
 }
+
+// Clear clears any loaded values.
+func (self Values) Clear() { clear(self) }
 
 // Tag is a tag parser.
 //
@@ -139,10 +141,10 @@ func (self *Tag) validKey(key string) (valid bool) {
 
 // ParseStructTag parses a raw struct tag into [Values].
 //
-// rawTag must be a raw struct tag string, possibly quoted with (``) and 
-// containing other tags such as "json", "db", etc. 
+// rawTag must be a raw struct tag string, possibly quoted with (“) and
+// containing other tags such as "json", "db", etc.
 //
-// It looks for a value under a key specified by [Tag.TagName] and parses its 
+// It looks for a value under a key specified by [Tag.TagName] and parses its
 // value into [Values]. See [Values] on how the tag value is parsed.
 func (self *Tag) ParseStructTag(rawTag string) (err error) {
 
@@ -173,15 +175,16 @@ func (self *Tag) ParseStructTag(rawTag string) (err error) {
 
 // ParseDocs parses go doc comments into [Values].
 //
-// docs must be a slice of raw lines from a declaration doc comment from which 
+// docs must be a slice of raw lines from a declaration doc comment from which
 // lines in the following form are parsed:
-//  //mytag:"key1,key2=value2,key3"
 //
-// I.e., the standard build tag way of a tag immediately following a double 
-// slash, a colon denoting the value that follows and a value inside double 
+//	//mytag:"key1,key2=value2,key3"
+//
+// I.e., the standard build tag way of a tag immediately following a double
+// slash, a colon denoting the value that follows and a value inside double
 // quotes that is parsed into [Tag.Values].
 //
-// Tag to parse is defined by [Tag.TagName]. See [Values] for details on how 
+// Tag to parse is defined by [Tag.TagName]. See [Values] for details on how
 // the tag value is parsed.
 func (self *Tag) ParseDocs(docs []string) (err error) {
 
