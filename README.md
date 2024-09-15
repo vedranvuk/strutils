@@ -1,12 +1,11 @@
 # strings
 
-Additional string parsing and manipulation functions for Go.
+Additional string parsing and manipulation functions for Go. 
 
-Rewrite of [github.com/vedranvuk/strings](https://github.com/vedranvuk/strings).
+Comparisons, prefixes, trimming, quoting, wildcards, random, segmentation, tags, values.
 
-## installation
-
-Exec `go get github.com/vedranvuk/strutils` and include.
+## Status
+Ever evolving.
 
 ## License
 
