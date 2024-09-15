@@ -97,10 +97,9 @@ type Tag struct {
 
 	// Keys is a set of recognised Values keys to parse.
 	//
-	// If keys is an empty slice all key= value pairs will be parsed.
-	// If keys is not an empty slice, unrecognised keys will be ignored or
-	// an error will be thrown if one is encountered if
-	// [Tag.ErrorOnUnknownKey] is true.
+	// If keys is an empty slice all keys or key=value pairs will be parsed.
+	// If keys is not an empty slice, unrecognised keys will be skipped silently
+	// or an error will be thrown if [Tag.ErrorOnUnknownKey] is true.
 	Keys []TagKey
 
 	// ErrorOnUnknownKey, if true will make parse functions throw an error if
@@ -122,22 +121,9 @@ func (self *Tag) init() error {
 	return nil
 }
 
-// ErrTagNotFound is returned when the defined tag was not found.
+// ErrTagNotFound is returned when tag named [Tag.TagName] was not found in a
+// struct tag or doc comments.
 var ErrTagNotFound = errors.New("tag not found")
-
-// validKey returns true if key is in [Config.Keys] or it is empty,
-// false otherwise.
-func (self *Tag) validKey(key string) (valid bool) {
-	if len(self.Keys) == 0 {
-		return true
-	}
-	for _, k := range self.Keys {
-		if k == key {
-			return true
-		}
-	}
-	return false
-}
 
 // ParseStructTag parses a raw struct tag into [Values].
 //
@@ -158,19 +144,7 @@ func (self *Tag) ParseStructTag(rawTag string) (err error) {
 		return ErrTagNotFound
 	}
 
-	for key, i := Segment(rawTag, ",", 0); i > -1 || key != ""; key, i = Segment(rawTag, ",", i) {
-		var k, v, pair = strings.Cut(key, "=")
-		if !self.validKey(k) {
-			return errors.New("invalid key: " + k)
-		}
-		if pair {
-			self.Values.Add(k, v)
-		} else {
-			self.Values.Add(k)
-		}
-
-	}
-	return nil
+	return self.parseTag(rawTag)
 }
 
 // ParseDocs parses go doc comments into [Values].
@@ -193,28 +167,53 @@ func (self *Tag) ParseDocs(docs []string) (err error) {
 	}
 
 	var tagPrefix = self.TagName + ":"
+	var found = false
 	for _, line := range docs {
 		line = strings.TrimSpace(strings.TrimPrefix(line, "//"))
 		if !strings.HasPrefix(line, tagPrefix) {
 			continue
 		}
+		found = true
 		line = strings.TrimPrefix(line, tagPrefix)
 		line, _ = UnquoteDouble(line)
-		for _, token := range strings.Split(line, ",") {
-			if token = strings.TrimSpace(token); token == "" {
-				continue
-			}
-			var key, val, pair = strings.Cut(token, "=")
-			if !pair {
-				self.Add(key, "")
-				continue
-			}
-			key = strings.TrimSpace(key)
-			val = strings.TrimSpace(val)
-			self.Values.Add(key, strings.Split(val, ",")...)
+		if err = self.parseTag(line); err != nil {
+			return
+		}
+	}
+	if !found {
+		return ErrTagNotFound
+	}
+	return nil
+}
+
+// parseTag parses cleaned extracted tag value into [Values].
+func (self *Tag) parseTag(tag string) error {
+	for key, i := Segment(tag, ",", 0); i > -1 || key != ""; key, i = Segment(tag, ",", i) {
+		var k, v, pair = strings.Cut(key, "=")
+		if !self.validKey(k) {
+			return errors.New("invalid key: " + k)
+		}
+		if pair {
+			self.Values.Add(k, v)
+		} else {
+			self.Values.Add(k)
 		}
 	}
 	return nil
+}
+
+// validKey returns true if key is in [Config.Keys] or it is empty,
+// false otherwise.
+func (self *Tag) validKey(key string) (valid bool) {
+	if len(self.Keys) == 0 {
+		return true
+	}
+	for _, k := range self.Keys {
+		if k == key {
+			return true
+		}
+	}
+	return false
 }
 
 // LookupTag returns the value associated with key in the tag string.
