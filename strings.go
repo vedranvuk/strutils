@@ -290,3 +290,15 @@ func SegmentFold(s, sep string, start int) (segment string, next int) {
 	end = start + end
 	return s[start:end], end + len(sep)
 }
+
+// WrapText wraps text into multiple lines at first whitespace before or exactly
+// at cols.
+//
+// If a word is longer than cols and force is true it is split at cols length
+// regardless of white space. If force is false, the word is not split and
+// placed into its own line at first next whitespace.
+func WrapText(text string, cols int, force bool) (out []string) {
+
+	
+	return
+}
