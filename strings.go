@@ -299,6 +299,46 @@ func SegmentFold(s, sep string, start int) (segment string, next int) {
 // placed into its own line at first next whitespace.
 func WrapText(text string, cols int, force bool) (out []string) {
 
+	var (
+		idx   = 0  // scan index
+		start = 0  // copy offset
+		space = -1 // last space position
+		col   = 0  // column counter
+		runes = []rune(text)
+	)
+
+	for idx < len(runes) {
+		if runes[idx] == ' ' {
+			space = idx
+		}
+		if col >= cols-1 {
+			if force {
+				goto AddForced
+			}
+			if space > -1 {
+				goto AddSpaced
+			}
+		}
+		col++
+		idx++
+		continue
+	AddSpaced:
+		out = append(out, text[start:space])
+		start = space + 1
+		goto Next
+	AddForced:
+		out = append(out, text[start:idx])
+		start = idx
+	Next:
+		space = -1
+		col = 0
+		idx++
+		continue
+	}
 	
+	if start < len(runes) {
+		out = append(out, text[start:])
+	}
+
 	return
 }
