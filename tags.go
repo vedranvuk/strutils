@@ -117,7 +117,9 @@ func (self *Tag) init() error {
 	if self.TagName == "" {
 		return errors.New("tag name not specified")
 	}
-	self.Values = make(Values)
+	if self.Values == nil {
+		self.Values = make(Values)
+	}
 	return nil
 }
 
