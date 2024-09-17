@@ -297,45 +297,76 @@ func SegmentFold(s, sep string, start int) (segment string, next int) {
 // If a word is longer than cols and force is true it is split at cols length
 // regardless of white space. If force is false, the word is not split and
 // placed into its own line at first next whitespace.
+//
+// Allocates runes of text and appends to out without preallocation.
 func WrapText(text string, cols int, force bool) (out []string) {
 
 	var (
-		idx   = 0  // scan index
-		start = 0  // copy offset
-		space = -1 // last space position
-		col   = 0  // column counter
-		runes = []rune(text)
+		idx   = 0            // scan index
+		start = 0            // copy offset
+		space = -1           // last space position
+		col   = 0            // column counter
+		runes = []rune(text) // alloc
 	)
 
-	for idx < len(runes) {
-		if runes[idx] == ' ' {
-			space = idx
+
+	for l := len(runes); idx < l; {
+
+		var isSpace = runes[idx] == ' '
+		if isSpace && col == 0 {
+			idx++
+			start = idx
+			continue
 		}
-		if col >= cols-1 {
-			if force {
-				goto AddForced
+
+		if col == cols-1 {
+			// Wrap if forced or next rune is a space.
+			if force || idx < l-1 && runes[idx+1] == ' ' {
+				out = append(out, text[start:idx+1])
+				start = idx + 1
+				idx++
+				col = 0
+				space = -1
+				continue
 			}
 			if space > -1 {
-				goto AddSpaced
+				// Wrap at last space.
+				out = append(out, text[start:space])
+				col = cols - (space - start) - 1
+				start = space + 1
+				space = -1
+				idx++
+				continue
+			} else if isSpace {
+				// Last col was space.
+				out = append(out, text[start:idx])
+				col = 0
+				start = idx + 1
+				space = -1
+				idx++
+				continue
 			}
 		}
+
+		if isSpace {
+
+			if col > cols-1 {
+				// Word is longer than cols.
+				out = append(out, text[start:idx])
+				col = 0
+				start = idx + 1
+				space = -1
+				idx++
+				continue
+			}
+
+			space = idx
+		}
+
 		col++
 		idx++
-		continue
-	AddSpaced:
-		out = append(out, text[start:space])
-		start = space + 1
-		goto Next
-	AddForced:
-		out = append(out, text[start:idx])
-		start = idx
-	Next:
-		space = -1
-		col = 0
-		idx++
-		continue
 	}
-	
+
 	if start < len(runes) {
 		out = append(out, text[start:])
 	}
