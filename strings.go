@@ -309,7 +309,6 @@ func WrapText(text string, cols int, force bool) (out []string) {
 		runes = []rune(text) // alloc
 	)
 
-
 	for l := len(runes); idx < l; {
 
 		var isSpace = runes[idx] == ' '
@@ -320,6 +319,27 @@ func WrapText(text string, cols int, force bool) (out []string) {
 		}
 
 		if col == cols-1 {
+
+			// Last col is space.
+			if isSpace {
+				out = append(out, text[start:idx])
+				col = 0
+				start = idx + 1
+				space = -1
+				idx++
+				continue
+			}
+
+			// Wrap at last space.
+			if space > -1 {
+				out = append(out, text[start:space])
+				col = cols - (space - start) - 1
+				start = space + 1
+				space = -1
+				idx++
+				continue
+			}
+
 			// Wrap if forced or next rune is a space.
 			if force || idx < l-1 && runes[idx+1] == ' ' {
 				out = append(out, text[start:idx+1])
@@ -329,23 +349,7 @@ func WrapText(text string, cols int, force bool) (out []string) {
 				space = -1
 				continue
 			}
-			if space > -1 {
-				// Wrap at last space.
-				out = append(out, text[start:space])
-				col = cols - (space - start) - 1
-				start = space + 1
-				space = -1
-				idx++
-				continue
-			} else if isSpace {
-				// Last col was space.
-				out = append(out, text[start:idx])
-				col = 0
-				start = idx + 1
-				space = -1
-				idx++
-				continue
-			}
+
 		}
 
 		if isSpace {
