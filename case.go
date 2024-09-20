@@ -208,3 +208,78 @@ var asciiLowercaseArray = [256]byte{
 	0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
 	0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff,
 }
+
+// CaseMapping specifies one of case mapping supported by this package.
+type CaseMapping int
+
+const (
+	// InvalidMapping is the invalid/undefined mapping.
+	InvalidMapping CaseMapping = iota
+	// NoMapping specifies no mapping.
+	NoMapping
+	// PascalMapping specifies PascalCase mapping.
+	PascalMapping
+	// SnakeMapping specifies snake_case mapping.
+	SnakeMapping
+	// CamelMapping specifies camelCase mapping.
+	CamelMapping
+	// KebabMapping specifies kebab-case mapping.
+	KebabMapping
+)
+
+// String implements stringer on CaseMapping.
+func (self CaseMapping) String() string {
+	switch self {
+	case NoMapping:
+		return "NoMapping"
+	case PascalMapping:
+		return "PascalMapping"
+	case SnakeMapping:
+		return "SnakeMapping"
+	case CamelMapping:
+		return "CamelMapping"
+	case KebabMapping:
+		return "KebabMapping"
+	default:
+		return "InvalidMapping"
+	}
+}
+
+// MarshalText implementes encoding.TextMarshaler on CaseMapping.
+func (self CaseMapping) MarshalText() (text []byte, err error) {
+	return []byte(self.String()), nil
+}
+
+// UnmarshalText implementes encoding.TextUnmarshaler on CaseMapping.
+func (self *CaseMapping) UnmarshalText(text []byte) error {
+	switch string(text) {
+	case "NoMapping":
+		*self = NoMapping
+	case "PascalMapping":
+		*self = PascalMapping
+	case "SnakeMapping":
+		*self = SnakeMapping
+	case "CamelMapping":
+		*self = CamelMapping
+	case "KebabMapping":
+		*self = KebabMapping
+	default:
+		*self = InvalidMapping
+	}
+	return nil
+}
+
+// Map case maps s depending on self value.
+func (self CaseMapping) Map(s string) string {
+	switch self {
+	case PascalMapping:
+		return PascalCase(s)
+	case SnakeMapping:
+		return SnakeCase(s)
+	case CamelMapping:
+		return CamelCase(s)
+	case KebabMapping:
+		return KebabCase(s)
+	}
+	return s
+}
