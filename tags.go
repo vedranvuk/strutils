@@ -6,15 +6,7 @@ import (
 	"strings"
 )
 
-// TagKey is a recognized key in a set of key=value pairs parsed
-// from a raw tag value.
-//
-// In struct tags:  `TagName:"TagKey=somevalue"`
-// In doc comments: //TagName:"TagKey=somevalue"
-type TagKey = string
-
-// Values is a parsed map of key=value pairs from a tag value.
-// An entry under some [TagKey] can have multiple values, stored as a slice.
+// Tag is a tag parser.
 //
 // Given:
 //
@@ -43,54 +35,13 @@ type TagKey = string
 // has following rules:
 //
 // Keys may appear without values or in key=value format. Multiple keys or pairs
-// are separated by a comma. Values may not contain commas or  double quotes.
-// Space is trimmed from any pair values. Specifying a pair with the same key
-// multiple times adds values to an entry under key in parsed [Values].
+// are separated by a comma. Values may not contain commas or double quotes.
 //
-// See [Tag.ParseStructTag] and [Tag.ParseDocs].
-type Values map[TagKey][]string
-
-// Add appends values to value slice under key.
+// Leading and trailing space is trimmed from pair values.
+// Specifying a pair with the same key multiple times adds values to an entry
+// under key in parsed [Values].
 //
-// If no values exist under key a new entry is added. If no values were
-// specified target slice is unmodified. Initial value of an empty entry is
-// a nil slice.
-func (self Values) Add(key string, values ...string) {
-	if s, exists := self[key]; exists {
-		s = append(s, values...)
-		self[key] = s
-		return
-	}
-	self[key] = values
-	return
-}
-
-// Exists returns true if entry under key exists.
-func (self Values) Exists(key string) (exists bool) {
-	_, exists = self[key]
-	return
-}
-
-// First returns the first value keyed under key.
-// If entry not found or no values for entry found returns an empty string.
-// Use [Values.Exists] to check if an entry exists.
-func (self Values) First(key string) (s string) {
-	if !self.Exists(key) {
-		return
-	}
-	if a := self[key]; len(a) > 0 {
-		return a[0]
-	}
-	return
-}
-
-// Clear clears any loaded values.
-func (self Values) Clear() { clear(self) }
-
-// Tag is a tag parser.
-//
-// It parses comma delimited set of keys or key=value pairs.
-// Internal representation is a keyvalue map.
+// See [Tag.Parse] for details.
 type Tag struct {
 	// TagName is the name of the tag to parse.
 	TagName string
@@ -108,11 +59,16 @@ type Tag struct {
 	// Default: false
 	ErrorOnUnknownKey bool
 
-	// Values are the parsed values.
-	// Nil until parsed.
+	// Values are the parsed values. Values are nil until [Tag.ParseDocs] or
+	// [Tag.ParseStructTag] is called.
 	Values
 }
 
+func (self *Tag) Parse(value string) error {
+	return nil
+}
+
+// init initializes Tag for parsing.
 func (self *Tag) init() error {
 	if self.TagName == "" {
 		return errors.New("tag name not specified")
@@ -129,7 +85,7 @@ var ErrTagNotFound = errors.New("tag not found")
 
 // ParseStructTag parses a raw struct tag into [Values].
 //
-// rawTag must be a raw struct tag string, possibly quoted with (“) and
+// rawTag must be a raw struct tag string, possibly quoted with (`) and
 // containing other tags such as "json", "db", etc.
 //
 // It looks for a value under a key specified by [Tag.TagName] and parses its
@@ -217,6 +173,89 @@ func (self *Tag) validKey(key string) (valid bool) {
 	}
 	return false
 }
+
+// TagKey is a recognized key in a set of key=value pairs parsed
+// from a raw tag value.
+//
+// In struct tags:  `TagName:"TagKey=somevalue"`
+// In doc comments: //TagName:"TagKey=somevalue"
+type TagKey = string
+
+// Values is a parsed map of key=value pairs from a tag value.
+// An entry under some [TagKey] can have multiple values, stored as a slice.
+//
+// Given:
+//
+//	const TagName = "mytag"
+//
+// both the
+//
+//	structTag = `json:"omitempty" MyTag:"key1,key2=value1,key2=value2,key3"`
+//
+// and
+//
+//	goDocLine = //myTag:"key1,key2=value1,key2=value2,key3"
+//
+// Results in the following:
+//
+//		Values{
+//			"key1": nil,
+//			"key2": []string{
+//				"value1",
+//				"value2",
+//	     }
+//			"key3": nil,
+//		}
+//
+// Contents of the quoted string following "MyTag:" are parsed as input which
+// has following rules:
+//
+// Keys may appear without values or in key=value format. Multiple keys or pairs
+// are separated by a comma. Values may not contain commas or double quotes.
+//
+// Leading and trailing space is trimmed from pair values.
+// Specifying a pair with the same key multiple times adds values to an entry
+// under key in parsed [Values].
+//
+// See [Tag.ParseStructTag] and [Tag.ParseDocs].
+type Values map[TagKey][]string
+
+// Add appends values to value slice under key.
+//
+// If no values exist under key a new entry is added. If no values were
+// specified target slice is unmodified. Initial value of an empty entry is
+// a nil slice.
+func (self Values) Add(key string, values ...string) {
+	if s, exists := self[key]; exists {
+		s = append(s, values...)
+		self[key] = s
+		return
+	}
+	self[key] = values
+	return
+}
+
+// Exists returns true if entry under key exists.
+func (self Values) Exists(key string) (exists bool) {
+	_, exists = self[key]
+	return
+}
+
+// First returns the first value keyed under key.
+// If entry not found or no values for entry found returns an empty string.
+// Use [Values.Exists] to check if an entry exists.
+func (self Values) First(key string) (s string) {
+	if !self.Exists(key) {
+		return
+	}
+	if a := self[key]; len(a) > 0 {
+		return a[0]
+	}
+	return
+}
+
+// Clear clears any loaded values.
+func (self Values) Clear() { clear(self) }
 
 // LookupTag returns the value associated with key in the tag string.
 // If the key is present in the tag the value (which may be empty)
