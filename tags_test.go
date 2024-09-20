@@ -7,8 +7,8 @@ func TestTParseStructTag(t *testing.T) {
 	const tag = `json:"omitempty" tag:"key1,key2=value1,key2=value2,key3" db:"name=foo"`
 
 	var config = &Tag{
-		TagName: "tag",
-		Keys:    []string{"key1", "key2", "key3"},
+		TagKey: "tag",
+		KnownPairKeys:    []string{"key1", "key2", "key3"},
 	}
 
 	if err := config.ParseStructTag(tag); err != nil {
@@ -47,8 +47,8 @@ func TestParseDocs(t *testing.T) {
 	}
 
 	var config = &Tag{
-		TagName: "tag",
-		Keys:    []string{"key1", "key2", "key3"},
+		TagKey: "tag",
+		KnownPairKeys:    []string{"key1", "key2", "key3"},
 	}
 
 	if err := config.ParseDocs(docs); err != nil {

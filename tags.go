@@ -6,21 +6,38 @@ import (
 	"strings"
 )
 
-// Tag is a tag parser.
+// TagKey names a key inside a tag string literal whose value is to be parsed 
+// into [Values].
+//
+// Given: 
+//
+//  tagKey := "MyKey"
+//  rawTag := `json:"omitempty" MyKey:"key1,key2=value1,key2=value2,key3"`
+//
+// TagKey specifies the "MyKey" key inside a tag string.
+type TagKey = string
+
+// PairKey is a recognized key in a set of key=value pairs parsed from a value 
+// keyed by a KeyName in a tag string literal.
 //
 // Given:
 //
-//	const TagName = "mytag"
+//  keyName := "MyKey"
+//  pairKey := "key1"
+//  rawTag  := `json:"omitempty" MyKey:"key1,key2=value1,key2=value2,key3"`
 //
-// both the
+// pairKey specifies the "key1" inside a value keyed by keyName.
+type PairKey = string
+
+// Tag parses value of a key inside a tag string literal into [Values] map.
 //
-//	structTag = `json:"omitempty" MyTag:"key1,key2=value1,key2=value2,key3"`
+// A Tag string is a string that holds zero or more values keyed by a [TagKey].
 //
-// and
+// Given:
 //
-//	goDocLine = //myTag:"key1,key2=value1,key2=value2,key3"
+//	tag := `json:"omitempty" MyTag:"key1,key2=value1,key2=value2,key3"`
 //
-// Results in the following:
+// Results in following Values structure:
 //
 //		Values{
 //			"key1": nil,
@@ -31,8 +48,7 @@ import (
 //			"key3": nil,
 //		}
 //
-// Contents of the quoted string following "MyTag:" are parsed as input which
-// has following rules:
+// The following rules, equal to how Go parses tags apply:
 //
 // Keys may appear without values or in key=value format. Multiple keys or pairs
 // are separated by a comma. Values may not contain commas or double quotes.
@@ -43,15 +59,16 @@ import (
 //
 // See [Tag.Parse] for details.
 type Tag struct {
-	// TagName is the name of the tag to parse.
-	TagName string
+	// TagKey is the name of the tag whose value is to be parsed into [Values].
+	TagKey
 
-	// Keys is a set of recognised Values keys to parse.
+	// KnownPairKeys is a set of recognised pair keys found inside a value of 
+	// a tag.
 	//
-	// If keys is an empty slice all keys or key=value pairs will be parsed.
-	// If keys is not an empty slice, unrecognised keys will be skipped silently
+	// If it is an empty slice all keys or key=value pairs will be parsed.
+	// If it is not an empty slice, unrecognised keys will be skipped silently
 	// or an error will be thrown if [Tag.ErrorOnUnknownKey] is true.
-	Keys []TagKey
+	KnownPairKeys []PairKey
 
 	// ErrorOnUnknownKey, if true will make parse functions throw an error if
 	// an unrecognised tag is found and [Tag.Keys] is not an empty slice.
@@ -64,13 +81,18 @@ type Tag struct {
 	Values
 }
 
-func (self *Tag) Parse(value string) error {
+// Parse parses a tag string literal into [Values].
+//
+// tag may be a backquoted string in which case it is unquoted before parsing.
+//
+// See [Tag] on details how the tag string is parsed.
+func (self *Tag) Parse(tag string) (err error) {
 	return nil
 }
 
 // init initializes Tag for parsing.
 func (self *Tag) init() error {
-	if self.TagName == "" {
+	if self.TagKey == "" {
 		return errors.New("tag name not specified")
 	}
 	if self.Values == nil {
@@ -98,7 +120,7 @@ func (self *Tag) ParseStructTag(rawTag string) (err error) {
 
 	rawTag, _ = Unwrap(rawTag, "`", "`")
 	var exists bool
-	if rawTag, exists = LookupTag(rawTag, self.TagName); !exists {
+	if rawTag, exists = LookupTag(rawTag, self.TagKey); !exists {
 		return ErrTagNotFound
 	}
 
@@ -124,7 +146,7 @@ func (self *Tag) ParseDocs(docs []string) (err error) {
 		return
 	}
 
-	var tagPrefix = self.TagName + ":"
+	var tagPrefix = self.TagKey + ":"
 	var found = false
 	for _, line := range docs {
 		line = strings.TrimSpace(strings.TrimPrefix(line, "//"))
@@ -163,10 +185,10 @@ func (self *Tag) parseTag(tag string) error {
 // validKey returns true if key is in [Config.Keys] or it is empty,
 // false otherwise.
 func (self *Tag) validKey(key string) (valid bool) {
-	if len(self.Keys) == 0 {
+	if len(self.KnownPairKeys) == 0 {
 		return true
 	}
-	for _, k := range self.Keys {
+	for _, k := range self.KnownPairKeys {
 		if k == key {
 			return true
 		}
@@ -174,15 +196,10 @@ func (self *Tag) validKey(key string) (valid bool) {
 	return false
 }
 
-// TagKey is a recognized key in a set of key=value pairs parsed
-// from a raw tag value.
-//
-// In struct tags:  `TagName:"TagKey=somevalue"`
-// In doc comments: //TagName:"TagKey=somevalue"
-type TagKey = string
+
 
 // Values is a parsed map of key=value pairs from a tag value.
-// An entry under some [TagKey] can have multiple values, stored as a slice.
+// An entry under some [PairKey] can have multiple values, stored as a slice.
 //
 // Given:
 //
@@ -218,7 +235,7 @@ type TagKey = string
 // under key in parsed [Values].
 //
 // See [Tag.ParseStructTag] and [Tag.ParseDocs].
-type Values map[TagKey][]string
+type Values map[PairKey][]string
 
 // Add appends values to value slice under key.
 //
