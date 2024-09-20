@@ -6,32 +6,30 @@ import (
 	"strings"
 )
 
-// TagKey names a key inside a tag string literal whose value is to be parsed 
+// TagKey names a key inside a tag string literal whose value is to be parsed
 // into [Values].
-//
-// Given: 
-//
-//  tagKey := "MyKey"
-//  rawTag := `json:"omitempty" MyKey:"key1,key2=value1,key2=value2,key3"`
-//
-// TagKey specifies the "MyKey" key inside a tag string.
-type TagKey = string
-
-// PairKey is a recognized key in a set of key=value pairs parsed from a value 
-// keyed by a KeyName in a tag string literal.
 //
 // Given:
 //
-//  keyName := "MyKey"
-//  pairKey := "key1"
-//  rawTag  := `json:"omitempty" MyKey:"key1,key2=value1,key2=value2,key3"`
+//	tagKey := "foo"
+//	rawTag := `json:"omitempty" foo:"key1,key2=value1,key2=value2,key3"`
 //
-// pairKey specifies the "key1" inside a value keyed by keyName.
+// TagKey specifies the "foo" key inside a tag string literal.
+type TagKey = string
+
+// PairKey is a recognized key in a set of key=value pairs parsed from a tag
+// value.
+//
+// Given:
+//
+//	tagKey  := "foo"
+//	pairKey := "key1"
+//	rawTag  := `json:"omitempty" foo:"key1,key2=value1,key2=value2,key3"`
+//
+// pairKey specifies the "key1" inside a value keyed by tagKey.
 type PairKey = string
 
 // Tag parses value of a key inside a tag string literal into [Values] map.
-//
-// A Tag string is a string that holds zero or more values keyed by a [TagKey].
 //
 // Given:
 //
@@ -57,12 +55,16 @@ type PairKey = string
 // Specifying a pair with the same key multiple times adds values to an entry
 // under key in parsed [Values].
 //
+// Specifying a PairKey without a value adds an entry without values in the
+// [Values] map. Specifying a PairKey with an empty value multiple times is a
+// no-op.
+//
 // See [Tag.Parse] for details.
 type Tag struct {
 	// TagKey is the name of the tag whose value is to be parsed into [Values].
 	TagKey
 
-	// KnownPairKeys is a set of recognised pair keys found inside a value of 
+	// KnownPairKeys is a set of recognised pair keys found inside a value of
 	// a tag.
 	//
 	// If it is an empty slice all keys or key=value pairs will be parsed.
@@ -81,93 +83,33 @@ type Tag struct {
 	Values
 }
 
+// ErrTagNotFound is returned when tag named [Tag.TagKey] was not found in a
+// tag string literal.
+var ErrTagNotFound = errors.New("tag not found")
+
 // Parse parses a tag string literal into [Values].
 //
-// tag may be a backquoted string in which case it is unquoted before parsing.
+// tag may be a backquoted string (for instance extracted from struct field
+// type using reflect) in which case it is unquoted before parsing.
 //
 // See [Tag] on details how the tag string is parsed.
 func (self *Tag) Parse(tag string) (err error) {
-	return nil
-}
 
-// init initializes Tag for parsing.
-func (self *Tag) init() error {
 	if self.TagKey == "" {
 		return errors.New("tag name not specified")
 	}
+
 	if self.Values == nil {
 		self.Values = make(Values)
 	}
-	return nil
-}
 
-// ErrTagNotFound is returned when tag named [Tag.TagName] was not found in a
-// struct tag or doc comments.
-var ErrTagNotFound = errors.New("tag not found")
+	tag, _ = Unwrap(tag, "`", "`")
 
-// ParseStructTag parses a raw struct tag into [Values].
-//
-// rawTag must be a raw struct tag string, possibly quoted with (`) and
-// containing other tags such as "json", "db", etc.
-//
-// It looks for a value under a key specified by [Tag.TagName] and parses its
-// value into [Values]. See [Values] on how the tag value is parsed.
-func (self *Tag) ParseStructTag(rawTag string) (err error) {
-
-	if err = self.init(); err != nil {
-		return
-	}
-
-	rawTag, _ = Unwrap(rawTag, "`", "`")
 	var exists bool
-	if rawTag, exists = LookupTag(rawTag, self.TagKey); !exists {
+	if tag, exists = LookupTag(tag, self.TagKey); !exists {
 		return ErrTagNotFound
 	}
 
-	return self.parseTag(rawTag)
-}
-
-// ParseDocs parses go doc comments into [Values].
-//
-// docs must be a slice of raw lines from a declaration doc comment from which
-// lines in the following form are parsed:
-//
-//	//mytag:"key1,key2=value2,key3"
-//
-// I.e., the standard build tag way of a tag immediately following a double
-// slash, a colon denoting the value that follows and a value inside double
-// quotes that is parsed into [Tag.Values].
-//
-// Tag to parse is defined by [Tag.TagName]. See [Values] for details on how
-// the tag value is parsed.
-func (self *Tag) ParseDocs(docs []string) (err error) {
-
-	if err = self.init(); err != nil {
-		return
-	}
-
-	var tagPrefix = self.TagKey + ":"
-	var found = false
-	for _, line := range docs {
-		line = strings.TrimSpace(strings.TrimPrefix(line, "//"))
-		if !strings.HasPrefix(line, tagPrefix) {
-			continue
-		}
-		found = true
-		line = strings.TrimPrefix(line, tagPrefix)
-		line, _ = UnquoteDouble(line)
-		if err = self.parseTag(line); err != nil {
-			return
-		}
-	}
-	if !found {
-		return ErrTagNotFound
-	}
-	return nil
-}
-
-// parseTag parses cleaned extracted tag value into [Values].
-func (self *Tag) parseTag(tag string) error {
 	for key, i := Segment(tag, ",", 0); i > -1 || key != ""; key, i = Segment(tag, ",", i) {
 		var k, v, pair = strings.Cut(key, "=")
 		if !self.validKey(k) {
@@ -196,45 +138,7 @@ func (self *Tag) validKey(key string) (valid bool) {
 	return false
 }
 
-
-
-// Values is a parsed map of key=value pairs from a tag value.
-// An entry under some [PairKey] can have multiple values, stored as a slice.
-//
-// Given:
-//
-//	const TagName = "mytag"
-//
-// both the
-//
-//	structTag = `json:"omitempty" MyTag:"key1,key2=value1,key2=value2,key3"`
-//
-// and
-//
-//	goDocLine = //myTag:"key1,key2=value1,key2=value2,key3"
-//
-// Results in the following:
-//
-//		Values{
-//			"key1": nil,
-//			"key2": []string{
-//				"value1",
-//				"value2",
-//	     }
-//			"key3": nil,
-//		}
-//
-// Contents of the quoted string following "MyTag:" are parsed as input which
-// has following rules:
-//
-// Keys may appear without values or in key=value format. Multiple keys or pairs
-// are separated by a comma. Values may not contain commas or double quotes.
-//
-// Leading and trailing space is trimmed from pair values.
-// Specifying a pair with the same key multiple times adds values to an entry
-// under key in parsed [Values].
-//
-// See [Tag.ParseStructTag] and [Tag.ParseDocs].
+// Values is a map of parsed key=value pairs from a tag value.
 type Values map[PairKey][]string
 
 // Add appends values to value slice under key.
