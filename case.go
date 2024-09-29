@@ -8,6 +8,8 @@
 
 package strutils
 
+import "errors"
+
 // Camelcase the given string.
 func CamelCase(s string) string {
 	var b = camelcase(s)
@@ -266,10 +268,11 @@ func (self *CaseMapping) UnmarshalText(text []byte) error {
 	default:
 		*self = InvalidMapping
 	}
-	return nil
+	return errors.New("unknown mapping: " + string(text))
 }
 
 // Map case maps s depending on self value.
+// If mapping value is unknown input string is returned unmodified.
 func (self CaseMapping) Map(s string) string {
 	switch self {
 	case PascalMapping:
