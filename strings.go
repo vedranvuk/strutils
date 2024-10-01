@@ -311,6 +311,16 @@ func WrapText(text string, cols int, force bool) (out []string) {
 
 	for l := len(runes); idx < l; {
 
+		// Wrap at newlines.
+		if runes[idx] == '\n' {
+			out = append(out, text[start:idx])
+			col = 0
+			start = idx + 1
+			space = -1
+			idx++
+			continue
+		}
+
 		var isSpace = runes[idx] == ' '
 		if isSpace && col == 0 {
 			idx++
