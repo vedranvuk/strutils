@@ -64,6 +64,11 @@ type Tag struct {
 	// TagKey is the name of the tag whose value is to be parsed into [Values].
 	TagKey
 
+	// Separator is the pair separator.
+	//
+	// Defaults to comma ",".
+	Separator string
+
 	// KnownPairKeys is a set of recognised pair keys found inside a value of
 	// a tag.
 	//
@@ -98,6 +103,9 @@ func (self *Tag) Parse(tag string) (err error) {
 	if self.TagKey == "" {
 		return errors.New("tag name not specified")
 	}
+	if self.Separator == "" {
+		self.Separator = ","
+	}
 
 	if self.Values == nil {
 		self.Values = make(Values)
@@ -110,7 +118,7 @@ func (self *Tag) Parse(tag string) (err error) {
 		return ErrTagNotFound
 	}
 
-	for key, i := Segment(tag, ",", 0); i > -1 || key != ""; key, i = Segment(tag, ",", i) {
+	for key, i := Segment(tag, self.Separator, 0); i > -1 || key != ""; key, i = Segment(tag, self.Separator, i) {
 		var k, v, pair = strings.Cut(key, "=")
 		if !self.validKey(k) {
 			return errors.New("invalid key: " + k)

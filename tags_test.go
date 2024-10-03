@@ -4,11 +4,12 @@ import "testing"
 
 func TestTag(t *testing.T) {
 
-	const tag = `json:"omitempty" tag:"key1,key2=value1,key2=value2,key3" db:"name=foo"`
+	const tag = `json:"omitempty" tag:"key1;key2=value1;key2=value2;key3" db:"name=foo"`
 
 	var config = &Tag{
-		TagKey: "tag",
-		KnownPairKeys:    []string{"key1", "key2", "key3"},
+		TagKey:        "tag",
+		Separator:     ";",
+		KnownPairKeys: []string{"key1", "key2", "key3"},
 	}
 
 	if err := config.Parse(tag); err != nil {
