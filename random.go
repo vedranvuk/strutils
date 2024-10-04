@@ -108,3 +108,45 @@ func RandomString(lo, up, nums bool, length int) string {
 	}
 	return toString(r)
 }
+
+// Foo
+type Foo struct {
+	MinName, MaxName int
+	Domains          []string
+}
+
+func NewFoo() Foo {
+	return Foo{
+		MinName: 2,
+		MaxName: 10,
+		Domains: []string{
+			".com",
+			".net",
+			".org",
+		},
+	}
+}
+
+func (self Foo) word(length int) string {
+	var out = make([]byte, 0, length)
+	for i := 0; i < length; i++ {
+		if rand.Intn(2) > 0 {
+			out = append(out, []byte(Random(Wovels))...)
+		} else {
+			out = append(out, []byte(Random(Consonants))...)
+		}
+	}
+	return string(out)
+}
+
+func (self Foo) Name() string {
+	return PascalCase(self.word(rand.Intn(self.MaxName-self.MinName) + self.MinName))
+}
+
+func (self Foo) EMail() string {
+	s := self.word(rand.Intn(self.MaxName-self.MinName) + self.MinName)
+	s += "@"
+	s += self.word(rand.Intn(self.MaxName-self.MinName) + self.MinName)
+	s += self.Domains[rand.Intn(len(self.Domains))]
+	return s
+}

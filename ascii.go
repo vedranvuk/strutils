@@ -14,6 +14,8 @@ const (
 	AlphaLower = "abcdefghijklmnopqrstuvxyz"
 	Alpha      = AlphaUpper + AlphaLower
 	AlphaNums  = Nums + Alpha
+	Wovels     = "aeiou"
+	Consonants = "bcdfghjklmnpqrstvxyz"
 )
 
 // Checks if "s" consists exclusively of numeric characters.
