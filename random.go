@@ -109,44 +109,76 @@ func RandomString(lo, up, nums bool, length int) string {
 	return toString(r)
 }
 
-// Foo
+// Foo returns various random texts.
 type Foo struct {
-	MinName, MaxName int
-	Domains          []string
+	// MinName is the minimum length for various name generation functions.
+	MinName int
+	// MaxName is the maximum length for various name generation functions.
+	MaxName int
+	// Domains is a set of domains used for generating fake urls or emails.
+	Domains []string
 }
 
+// NewFoo returns a new Foo.
 func NewFoo() Foo {
 	return Foo{
 		MinName: 2,
 		MaxName: 10,
-		Domains: []string{
-			".com",
-			".net",
-			".org",
-		},
+
+		Domains: []string{".com", ".net", ".org"},
 	}
 }
 
-func (self Foo) word(length int) string {
-	var out = make([]byte, 0, length)
-	for i := 0; i < length; i++ {
-		if rand.Intn(2) > 0 {
-			out = append(out, []byte(Random(Wovels))...)
-		} else {
-			out = append(out, []byte(Random(Consonants))...)
+// word returns a random word of specified length l.
+// It will be a combination of wovels and consonants.
+func (self Foo) word(l int) string {
+	var (
+		out = make([]byte, 0, l)
+		nw  = 0
+		nc  = 0
+	)
+	for i := 0; i < l; i++ {
+		if nc == 2 {
+			goto Wovel
 		}
+		if nw == 1 {
+			goto Consonant
+		}
+		if self.Bool() {
+			goto Wovel
+		}
+		goto Consonant
+	Wovel:
+		out = append(out, []byte(Random(Wovels))...)
+		nw++
+		nc = 0
+		continue
+	Consonant:
+		out = append(out, []byte(Random(Consonants))...)
+		nc++
+		nw = 0
+		continue
 	}
 	return string(out)
 }
 
+// intRng returns a random int between lo and hi.
+func (self Foo) intRng(lo, hi int) int { return rand.Intn(hi-lo) + lo }
+
+// Bool returns a random bool.
+func (self Foo) Bool() bool { return rand.Intn(2) > 0 }
+
+// Name returns a random name.
 func (self Foo) Name() string {
-	return PascalCase(self.word(rand.Intn(self.MaxName-self.MinName) + self.MinName))
+	return PascalCase(self.word(self.intRng(self.MinName, self.MaxName)))
 }
 
+// EMail returns a random email where name and domain name are randomly
+// generated words and the domain will be one of configured domains.
 func (self Foo) EMail() string {
-	s := self.word(rand.Intn(self.MaxName-self.MinName) + self.MinName)
+	s := self.word(self.intRng(self.MinName, self.MaxName))
 	s += "@"
-	s += self.word(rand.Intn(self.MaxName-self.MinName) + self.MinName)
+	s += self.word(self.intRng(self.MinName, self.MaxName))
 	s += self.Domains[rand.Intn(len(self.Domains))]
 	return s
 }

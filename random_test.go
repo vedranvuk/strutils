@@ -12,3 +12,11 @@ func TestFoo(t *testing.T) {
 		fmt.Println(foo.EMail())
 	}
 }
+
+func BenchmarkWord(b *testing.B) {
+	var foo =  NewFoo()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		foo.word(10)
+	}
+}
