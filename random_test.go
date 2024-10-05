@@ -8,8 +8,10 @@ import (
 func TestFoo(t *testing.T) {
 	var foo = NewFoo()
 	for i := 0; i < 100; i++ {
-		fmt.Println(foo.Name())
-		fmt.Println(foo.EMail())
+		if testing.Verbose() {
+			fmt.Println(foo.Name())
+			fmt.Println(foo.EMail())
+		}
 	}
 }
 

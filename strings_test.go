@@ -124,7 +124,9 @@ At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praese
 func TestWrapText(t *testing.T) {
 	if testing.Verbose() {
 		for _, line := range WrapText(loremIpsum, 100, false) {
-			fmt.Println(line)
+			if testing.Verbose() {
+				fmt.Println(line)
+			}
 		}
 		return
 	}
