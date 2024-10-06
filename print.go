@@ -13,7 +13,7 @@ func ByteString(buf []byte, width int) string {
 		fmt.Fprintf(&sb, "%X ", b)
 		if c == width-1 {
 			sb.WriteString(" ")
-			sb.WriteString(string(buf[s : i+1]))
+			sb.WriteString(str(buf[s : i+1]))
 			sb.WriteRune('\n')
 			s = i + 1
 			c = 0
@@ -26,9 +26,21 @@ func ByteString(buf []byte, width int) string {
 			sb.WriteString("00 ")
 		}
 		sb.WriteString(" ")
-		sb.WriteString(string(buf[len(buf)-c:]))
+		sb.WriteString(str(buf[len(buf)-c:]))
 		sb.WriteRune('\n')
 	}
 
 	return sb.String()
+}
+
+func str(in []byte) string {
+	var out = make([]byte, 0, len(in))
+	for _, b := range in {
+
+		if b < 32 {
+			out = append(out, 32)
+		}
+		out = append(out, b)
+	}
+	return string(out)
 }
