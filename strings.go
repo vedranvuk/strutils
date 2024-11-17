@@ -6,6 +6,7 @@
 package strutils
 
 import (
+	"sort"
 	"strings"
 )
 
@@ -383,6 +384,38 @@ func WrapText(text string, cols int, force bool) (out []string) {
 
 	if start < len(runes) {
 		out = append(out, text[start:])
+	}
+
+	return
+}
+
+// Unique returns unique strings from in.
+//
+// Returned strings are in order as passed in.
+func Unique(in ...string) (out []string) {
+
+	var (
+		m = make(map[string]int)
+		r = make(map[int]string)
+	)
+
+	for i, s := range in {
+		if _, ok := m[s]; !ok {
+			m[s] = i
+		}
+	}
+
+	var n = make([]int, 0, len(m))
+	for k, v := range m {
+		r[v] = k
+		n = append(n, v)
+	}
+	sort.Ints(n)
+
+	out = make([]string, 0, len(m))
+
+	for _, i := range n {
+		out = append(out, r[i])
 	}
 
 	return

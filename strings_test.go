@@ -156,3 +156,47 @@ func BenchmarkRandomString(b *testing.B) {
 		RandomString(true, true, true, 10)
 	}
 }
+
+func TestUnique(t *testing.T) {
+	var input = []string{
+		"one",
+		"two",
+		"three",
+		"two",
+		"four",
+		"four",
+		"five",
+	}
+	var output = []string{
+		"one",
+		"two",
+		"three",
+		"four",
+		"five",
+	}
+
+	var out = Unique(input...)
+	fmt.Println(out)
+
+	for i, s := range Unique(input...) {
+		if output[i] != s {
+			t.Fatal("Unique failed")
+		} 
+	}
+}
+
+func BenchmarkUnique(b *testing.B) {
+	var input = []string{
+		"one",
+		"two",
+		"three",
+		"two",
+		"four",
+		"four",
+		"five",
+	}	
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Unique(input...)	
+	}
+}
