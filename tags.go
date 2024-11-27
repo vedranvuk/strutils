@@ -83,6 +83,10 @@ type Tag struct {
 	// Default: false
 	ErrorOnUnknownKey bool
 
+	// Raw is the raw tag value that was parsed.
+	// Set after [Tag.Parse].
+	Raw string
+
 	// Values are the parsed values. Values are nil until [Tag.ParseDocs] or
 	// [Tag.ParseStructTag] is called.
 	Values
@@ -117,6 +121,7 @@ func (self *Tag) Parse(tag string) (err error) {
 	if tag, exists = LookupTag(tag, self.TagKey); !exists {
 		return ErrTagNotFound
 	}
+	self.Raw = tag
 
 	for key, i := Segment(tag, self.Separator, 0); i > -1 || key != ""; key, i = Segment(tag, self.Separator, i) {
 		var k, v, pair = strings.Cut(key, "=")
