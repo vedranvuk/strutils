@@ -121,7 +121,7 @@ func (self *Tag) Parse(tag string) (err error) {
 	if tag, exists = LookupTag(tag, self.TagKey); !exists {
 		return ErrTagNotFound
 	}
-	self.Raw = tag
+	_, self.Raw, _ = strings.Cut(tag, "=")
 
 	for key, i := Segment(tag, self.Separator, 0); i > -1 || key != ""; key, i = Segment(tag, self.Separator, i) {
 		var k, v, pair = strings.Cut(key, "=")
