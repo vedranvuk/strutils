@@ -175,6 +175,15 @@ func (self Values) Exists(key string) (exists bool) {
 	return
 }
 
+// Exists returns true if entry under key exists.
+func (self Values) ExistsNonEmpty(key string) (exists bool) {
+	var val []string
+	if val, exists = self[key]; !exists {
+		return
+	}
+	return len(val) > 0 && val[0] != ""
+}
+
 // First returns the first value keyed under key.
 // If entry not found or no values for entry found returns an empty string.
 // Use [Values.Exists] to check if an entry exists.
