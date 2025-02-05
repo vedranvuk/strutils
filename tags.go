@@ -175,7 +175,8 @@ func (self Values) Exists(key string) (exists bool) {
 	return
 }
 
-// Exists returns true if entry under key exists.
+// Exists returns true if entry under key exists and has at least one value 
+// which is not empty.
 func (self Values) ExistsNonEmpty(key string) (exists bool) {
 	var val []string
 	if val, exists = self[key]; !exists {
