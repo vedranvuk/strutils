@@ -175,7 +175,7 @@ func (self Values) Exists(key string) (exists bool) {
 	return
 }
 
-// Exists returns true if entry under key exists and has at least one value 
+// Exists returns true if entry under key exists and has at least one value
 // which is not empty.
 func (self Values) ExistsNonEmpty(key string) (exists bool) {
 	var val []string
@@ -196,6 +196,20 @@ func (self Values) First(key string) (s string) {
 		return a[0]
 	}
 	return
+}
+
+// Set sets value of out to value under specified key and returns true.
+// If key was not found or has no value out is not set and false is returned.
+func (self Values) Set(key string, out *string) (exists bool) {
+	var val []string
+	if val, exists = self[key]; !exists {
+		return
+	}
+	if len(val) == 0 || val[0] == "" {
+		return false
+	}
+	*out = val[0]
+	return true
 }
 
 // Clear clears any loaded values.
