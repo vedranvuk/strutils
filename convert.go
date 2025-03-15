@@ -4,6 +4,7 @@ import (
 	"encoding"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -26,21 +27,7 @@ type Value interface {
 
 // StringToAny sets v which must be a pointer to a supported type from raw
 // or returns an error if conversion error occured.
-func (self Converter) StringToAny(in, out any) (err error) {
-	switch tin := in.(type) {
-	case string:
-		return self.setString(tin, out)
-	case []string:
-		switch tout := out.(type) {
-		case *[]string:
-			*tout = tin
-			return nil
-		}
-	}
-	return errors.New("unsupported input type")
-}
-
-func (self Converter) setString(in string, out any) (err error) {
+func (self Converter) StringToAny(in string, out any) (err error) {
 	switch p := out.(type) {
 	case *string:
 		*p = in
@@ -100,13 +87,182 @@ func (self Converter) setString(in string, out any) (err error) {
 		}
 	case *float64:
 		*p, err = strconv.ParseFloat(in, 64)
+	case *complex128:
+		*p, err = strconv.ParseComplex(in, 128)
+	case *complex64:
+		var v complex128
+		if v, err = strconv.ParseComplex(in, 128); err == nil {
+			*p = complex64(v)
+		}
 	case *time.Duration:
 		*p, err = time.ParseDuration(in)
 	case *time.Time:
 		*p, err = time.Parse(self.TimeFormat, in)
+	case *[]string:
+		var elems = strings.Split(in, ",")
+		var slice = make([]string, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]bool:
+		var elems = strings.Split(in, ",")
+		var slice = make([]bool, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]int:
+		var elems = strings.Split(in, ",")
+		var slice = make([]int, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]uint:
+		var elems = strings.Split(in, ",")
+		var slice = make([]uint, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]int8:
+		var elems = strings.Split(in, ",")
+		var slice = make([]int8, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]uint8:
+		var elems = strings.Split(in, ",")
+		var slice = make([]uint8, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]int16:
+		var elems = strings.Split(in, ",")
+		var slice = make([]int16, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]uint16:
+		var elems = strings.Split(in, ",")
+		var slice = make([]uint16, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]int32:
+		var elems = strings.Split(in, ",")
+		var slice = make([]int32, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]uint32:
+		var elems = strings.Split(in, ",")
+		var slice = make([]uint32, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]int64:
+		var elems = strings.Split(in, ",")
+		var slice = make([]int64, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]uint64:
+		var elems = strings.Split(in, ",")
+		var slice = make([]uint64, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]float32:
+		var elems = strings.Split(in, ",")
+		var slice = make([]float32, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]float64:
+		var elems = strings.Split(in, ",")
+		var slice = make([]float64, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]complex128:
+		var elems = strings.Split(in, ",")
+		var slice = make([]complex128, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]complex64:
+		var elems = strings.Split(in, ",")
+		var slice = make([]complex64, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]time.Duration:
+		var elems = strings.Split(in, ",")
+		var slice = make([]time.Duration, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
+	case *[]time.Time:
+		var elems = strings.Split(in, ",")
+		var slice = make([]time.Time, len(elems))
+		for i, part := range elems {
+			if err = self.StringToAny(strings.TrimSpace(part), &slice[i]); err != nil {
+				return err
+			}
+		}
+		*p = slice
 	default:
 		if v, ok := p.(encoding.TextUnmarshaler); ok {
-			return v.UnmarshalText([]byte(in))
+			return v.UnmarshalText(UnsafeStringBytes(in))
 		}
 		if v, ok := p.(Value); ok {
 			err = v.Set(in)

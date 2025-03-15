@@ -6,12 +6,13 @@ package strutils
 
 import (
 	"math/rand"
+	"strings"
 	"unsafe"
 )
 
 // Default special characters set used in passwords.
 // < and > may cause issues on some systems.
-const DefSpecialChars = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+var DefSpecialChars = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
 // toString performs unholy acts to avoid allocations
 // https://github.com/kubernetes/kubernetes/blob/e4b74dd12fa8cb63c174091d5536a10b8ec19d34/staging/src/k8s.io/apiserver/pkg/authentication/token/cache/cached_token_authenticator.go#L288-L297
@@ -82,6 +83,16 @@ func RandomSpecials(length int) string {
 	return Randoms(DefSpecialChars, length)
 }
 
+var randomFuncs []func() string
+
+func init() {
+	randomFuncs = []func() string{
+		RandomLower,
+		RandomUpper,
+		RandomNum,
+	}
+}
+
 // Returns a random string of "length".
 // If "lo" includes lowercase letters.
 // If "up" includes uppercase letters.
@@ -90,7 +101,7 @@ func RandomString(lo, up, nums bool, length int) string {
 	if length < 1 {
 		return ""
 	}
-	f := []func() string{}
+	var f = randomFuncs[:0]
 	if lo {
 		f = append(f, RandomLower)
 	}
@@ -100,13 +111,14 @@ func RandomString(lo, up, nums bool, length int) string {
 	if nums {
 		f = append(f, RandomNum)
 	}
-	r := make([]byte, length, length)
-	if lo || up || nums {
+	var sb strings.Builder
+	sb.Grow(length)
+	if len(f) > 0 {
 		for i := 0; i < length; i++ {
-			r[i] = byte(f[rand.Intn(len(f))]()[0])
+			sb.WriteString(f[rand.Intn(len(f))]())
 		}
 	}
-	return toString(r)
+	return sb.String()
 }
 
 // Foo returns various random texts.
