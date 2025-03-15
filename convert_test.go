@@ -53,24 +53,24 @@ func TestConverter(t *testing.T) {
 		Custom        Custom
 		Unmarshalable Unmarshalable
 
-		StringSlice    []string
-		BoolSlice      []bool
-		IntSlice       []int
-		UIntSlice      []uint
-		Int8Slice      []int8
-		UInt8Slice     []uint8
-		Int16Slice     []int16
-		UInt16Slice    []uint16
-		Int32Slice     []int32
-		UInt32Slice    []uint32
-		Int64Slice     []int64
-		UInt64Slice    []uint64
-		Float32Slice   []float32
-		Float64Slice   []float64
-		Complex64Slice []complex64
+		StringSlice     []string
+		BoolSlice       []bool
+		IntSlice        []int
+		UIntSlice       []uint
+		Int8Slice       []int8
+		UInt8Slice      []uint8
+		Int16Slice      []int16
+		UInt16Slice     []uint16
+		Int32Slice      []int32
+		UInt32Slice     []uint32
+		Int64Slice      []int64
+		UInt64Slice     []uint64
+		Float32Slice    []float32
+		Float64Slice    []float64
+		Complex64Slice  []complex64
 		Complex128Slice []complex128
-		DurationSlice  []time.Duration
-		TimeSlice      []time.Time
+		DurationSlice   []time.Duration
+		TimeSlice       []time.Time
 	)
 
 	c := NewConverter()

@@ -8,8 +8,19 @@ import (
 	"time"
 )
 
+// StringValueSetter is an interface which can convert a string to self.
+type StringValueSetter interface {
+	Set(string) error
+}
+
+// StringValueGetter is an interface which can return self as string.
+type StringValueGetter interface {
+	Get() string
+}
+
 // Converter converts strings and string slices into basic go types.
 type Converter struct {
+	// TimeFormat is the time layout sring used to parse time strings.
 	TimeFormat string
 }
 
@@ -20,13 +31,11 @@ func NewConverter() Converter {
 	}
 }
 
-// Value is an interface which can convert a string to self.
-type Value interface {
-	Set(string) error
-}
-
-// StringToAny sets v which must be a pointer to a supported type from raw
-// or returns an error if conversion error occured.
+// StringToAny converts in to out or returns an error.
+//
+// In must be a GoString compatible with out which must be a pointer to the
+// variable whose value is to be set. Basic, non-structured types and slices of
+// those types are supported.
 func (self Converter) StringToAny(in string, out any) (err error) {
 	switch p := out.(type) {
 	case *string:
@@ -264,7 +273,7 @@ func (self Converter) StringToAny(in string, out any) (err error) {
 		if v, ok := p.(encoding.TextUnmarshaler); ok {
 			return v.UnmarshalText(UnsafeStringBytes(in))
 		}
-		if v, ok := p.(Value); ok {
+		if v, ok := p.(StringValueSetter); ok {
 			err = v.Set(in)
 		} else {
 			return errors.New("incompatible target var")
