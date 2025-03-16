@@ -69,7 +69,7 @@ func TestRandomNum(t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Expected length 1, got %d", len(result))
 	}
-	if !strings.Contains(string(numerals), result) {
+	if !strings.Contains(string(Numerals), result) {
 		t.Errorf("Result not in numerals")
 	}
 }
@@ -87,7 +87,7 @@ func TestRandomNums(t *testing.T) {
 		t.Errorf("Expected length %d, got %d", length, len(result))
 	}
 	for _, r := range result {
-		if !strings.Contains(string(numerals), string(r)) {
+		if !strings.Contains(string(Numerals), string(r)) {
 			t.Errorf("Result not in numerals")
 		}
 	}
@@ -105,7 +105,7 @@ func TestRandomUpper(t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Expected length 1, got %d", len(result))
 	}
-	if !strings.Contains(string(alphaUpper), result) {
+	if !strings.Contains(string(AlphaUpper), result) {
 		t.Errorf("Result not in alphaUpper")
 	}
 }
@@ -123,7 +123,7 @@ func TestRandomUppers(t *testing.T) {
 		t.Errorf("Expected length %d, got %d", length, len(result))
 	}
 	for _, r := range result {
-		if !strings.Contains(string(alphaUpper), string(r)) {
+		if !strings.Contains(string(AlphaUpper), string(r)) {
 			t.Errorf("Result not in alphaUpper")
 		}
 	}
@@ -141,7 +141,7 @@ func TestRandomLower(t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Expected length 1, got %d", len(result))
 	}
-	if !strings.Contains(string(alphaLower), result) {
+	if !strings.Contains(string(AlphaLower), result) {
 		t.Errorf("Result not in alphaLower")
 	}
 }
@@ -159,7 +159,7 @@ func TestRandomLowers(t *testing.T) {
 		t.Errorf("Expected length %d, got %d", length, len(result))
 	}
 	for _, r := range result {
-		if !strings.Contains(string(alphaLower), string(r)) {
+		if !strings.Contains(string(AlphaLower), string(r)) {
 			t.Errorf("Result not in alphaLower")
 		}
 	}
@@ -177,7 +177,7 @@ func TestRandomSpecial(t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Expected length 1, got %d", len(result))
 	}
-	if !strings.Contains(string(specialChars), result) {
+	if !strings.Contains(string(SpecialChars), result) {
 		t.Errorf("Result not in specialChars")
 	}
 }
@@ -195,7 +195,7 @@ func TestRandomSpecials(t *testing.T) {
 		t.Errorf("Expected length %d, got %d", length, len(result))
 	}
 	for _, r := range result {
-		if !strings.Contains(string(specialChars), string(r)) {
+		if !strings.Contains(string(SpecialChars), string(r)) {
 			t.Errorf("Result not in specialChars")
 		}
 	}

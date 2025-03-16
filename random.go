@@ -10,21 +10,37 @@ import (
 )
 
 var (
-	wovels        = []byte("aeiou")
-	consonants    = []byte("bcdfghjklmnpqrstvxyz")
-	specialChars  = []byte(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
-	numerals      = []byte("0123456789")
-	alphaUpper    = []byte("ABCDEFGHIJKLMNOPQRSTUVXYZ")
-	alphaLower    = []byte("abcdefghijklmnopqrstuvxyz")
-	alpha         = append(alphaUpper, alphaLower...)
-	alphaNumerals = append(numerals, alpha...)
+	Wovels        = "aeiou"
+	Consonants    = "bcdfghjklmnpqrstvxyz"
+	SpecialChars  = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+	Numerals      = "0123456789"
+	AlphaUpper    = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
+	AlphaLower    = "abcdefghijklmnopqrstuvxyz"
+	Alpha         = AlphaUpper + AlphaLower
+	AlphaNumerals = Numerals + Alpha
 )
 
+var (
+	WovelsBytes        = []byte(Wovels)
+	ConsonantsBytes    = []byte(Consonants)
+	SpecialCharsBytes  = []byte(SpecialChars)
+	NumeralsBytes      = []byte(Numerals)
+	AlphaUpperBytes    = []byte(AlphaUpper)
+	AlphaLowerBytes    = []byte(AlphaLower)
+	AlphaBytes         = []byte(Alpha)
+	AlphaNumeralsBytes = []byte(AlphaNumerals)
+)
 
 // Random returns a string containing a single character from set.
 func Random(set []byte) string {
 	var i = rand.Intn(len(set))
-	return UnsafeString(set[i:i+1])
+	return UnsafeString(set[i : i+1])
+}
+
+// Random returns a string containing a single character from set.
+func RandomByte(set []byte) []byte {
+	var i = rand.Intn(len(set))
+	return set[i : i+1]
 }
 
 // Randoms returns a string of length consisting of random characters from s.
@@ -41,42 +57,42 @@ func Randoms(set []byte, length int) string {
 
 // Returns a string containing a random number.
 func RandomNum() string {
-	return Random(numerals)
+	return Random(NumeralsBytes)
 }
 
 // Returns a string of random numbers of length.
 func RandomNums(length int) string {
-	return Randoms(numerals, length)
+	return Randoms(NumeralsBytes, length)
 }
 
 // Returns a string containing a random uppercase letter.
 func RandomUpper() string {
-	return Random(alphaUpper)
+	return Random(AlphaUpperBytes)
 }
 
 // Returns a string of random uppercase letters of length.
 func RandomUppers(length int) string {
-	return Randoms(alphaUpper, length)
+	return Randoms(AlphaUpperBytes, length)
 }
 
 // Returns a string containing a random lowercase letter.
 func RandomLower() string {
-	return Random(alphaLower)
+	return Random(AlphaLowerBytes)
 }
 
 // Returns a string of random lowercase letters of length.
 func RandomLowers(length int) string {
-	return Randoms(alphaLower, length)
+	return Randoms(AlphaLowerBytes, length)
 }
 
 // Returns a string containing a random password special character.
 func RandomSpecial() string {
-	return Random(specialChars)
+	return Random(SpecialCharsBytes)
 }
 
 // Returns a string of random special characters of length.
 func RandomSpecials(length int) string {
-	return Randoms(specialChars, length)
+	return Randoms(SpecialCharsBytes, length)
 }
 
 var randomFuncs []func() string
@@ -157,12 +173,12 @@ func (self Foo) word(l int) string {
 		}
 		goto Consonant
 	Wovel:
-		out = append(out, []byte(Random(wovels))...)
+		out = append(out, RandomByte(WovelsBytes)...)
 		nw++
 		nc = 0
 		continue
 	Consonant:
-		out = append(out, []byte(Random(consonants))...)
+		out = append(out, RandomByte(ConsonantsBytes)...)
 		nc++
 		nw = 0
 		continue
