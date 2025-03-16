@@ -17,7 +17,7 @@ func CamelCase(s string) string {
 	if len(b) != 0 {
 		b[0] = ToLower(b[0])
 	}
-	return toString(b)
+	return UnsafeString(b)
 }
 
 // Pascalcase the given string.
@@ -27,7 +27,7 @@ func PascalCase(s string) string {
 	if len(b) != 0 {
 		b[0] = ToUpper(b[0])
 	}
-	return toString(b)
+	return UnsafeString(b)
 }
 
 // Snakecase the given string.
@@ -169,7 +169,7 @@ func separatorCase(s string, separator byte) string {
 			idx++
 		}
 	}
-	return toString(b) // return manipulated string
+	return UnsafeString(b) // return manipulated string
 }
 
 var asciiLowercaseArray = [256]byte{

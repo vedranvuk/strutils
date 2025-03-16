@@ -7,32 +7,28 @@ package strutils
 import (
 	"math/rand"
 	"strings"
-	"unsafe"
 )
 
-// Default special characters set used in passwords.
-// < and > may cause issues on some systems.
-var DefSpecialChars = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+var (
+	wovels        = []byte("aeiou")
+	consonants    = []byte("bcdfghjklmnpqrstvxyz")
+	specialChars  = []byte(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
+	numerals      = []byte("0123456789")
+	alphaUpper    = []byte("ABCDEFGHIJKLMNOPQRSTUVXYZ")
+	alphaLower    = []byte("abcdefghijklmnopqrstuvxyz")
+	alpha         = append(alphaUpper, alphaLower...)
+	alphaNumerals = append(numerals, alpha...)
+)
 
-// toString performs unholy acts to avoid allocations
-// https://github.com/kubernetes/kubernetes/blob/e4b74dd12fa8cb63c174091d5536a10b8ec19d34/staging/src/k8s.io/apiserver/pkg/authentication/token/cache/cached_token_authenticator.go#L288-L297
-func toString(b []byte) string {
-	// unsafe.SliceData relies on cap whereas we want to rely on len
-	if len(b) == 0 {
-		return ""
-	}
-	// Copied from go 1.20.1 strings.Builder.String
-	// https://github.com/golang/go/blob/202a1a57064127c3f19d96df57b9f9586145e21c/src/strings/builder.go#L48
-	return unsafe.String(unsafe.SliceData(b), len(b))
-}
 
 // Random returns a string containing a single character from set.
-func Random(set string) string {
-	return toString([]byte{set[rand.Intn(len(set))]})
+func Random(set []byte) string {
+	var i = rand.Intn(len(set))
+	return UnsafeString(set[i:i+1])
 }
 
 // Randoms returns a string of length consisting of random characters from s.
-func Randoms(set string, length int) string {
+func Randoms(set []byte, length int) string {
 	if length < 1 {
 		return ""
 	}
@@ -40,47 +36,47 @@ func Randoms(set string, length int) string {
 	for i := 0; i < length; i++ {
 		r[i] = set[rand.Intn(len(set))]
 	}
-	return toString(r)
+	return UnsafeString(r)
 }
 
 // Returns a string containing a random number.
 func RandomNum() string {
-	return Random(Nums)
+	return Random(numerals)
 }
 
 // Returns a string of random numbers of length.
 func RandomNums(length int) string {
-	return Randoms(Nums, length)
+	return Randoms(numerals, length)
 }
 
 // Returns a string containing a random uppercase letter.
 func RandomUpper() string {
-	return Random(AlphaUpper)
+	return Random(alphaUpper)
 }
 
 // Returns a string of random uppercase letters of length.
 func RandomUppers(length int) string {
-	return Randoms(AlphaUpper, length)
+	return Randoms(alphaUpper, length)
 }
 
 // Returns a string containing a random lowercase letter.
 func RandomLower() string {
-	return Random(AlphaLower)
+	return Random(alphaLower)
 }
 
 // Returns a string of random lowercase letters of length.
 func RandomLowers(length int) string {
-	return Randoms(AlphaLower, length)
+	return Randoms(alphaLower, length)
 }
 
 // Returns a string containing a random password special character.
 func RandomSpecial() string {
-	return Random(DefSpecialChars)
+	return Random(specialChars)
 }
 
 // Returns a string of random special characters of length.
 func RandomSpecials(length int) string {
-	return Randoms(DefSpecialChars, length)
+	return Randoms(specialChars, length)
 }
 
 var randomFuncs []func() string
@@ -161,12 +157,12 @@ func (self Foo) word(l int) string {
 		}
 		goto Consonant
 	Wovel:
-		out = append(out, []byte(Random(Wovels))...)
+		out = append(out, []byte(Random(wovels))...)
 		nw++
 		nc = 0
 		continue
 	Consonant:
-		out = append(out, []byte(Random(Consonants))...)
+		out = append(out, []byte(Random(consonants))...)
 		nc++
 		nw = 0
 		continue

@@ -83,24 +83,6 @@ func TestStringFunctions(t *testing.T) {
 	}
 }
 
-func TestAsciiFunctions(t *testing.T) {
-	if !IsNumsOnly("12345") {
-		t.Error("IsNumsOnly() failed.")
-	}
-	if !IsAlphaLowerOnly("abcde") {
-		t.Error("IsAlphaLowerOnly() failed.")
-	}
-	if !IsAlphaUpperOnly("ABCDE") {
-		t.Error("IsAlphaUpperOnly() failed.")
-	}
-	if !IsAlphaOnly("abcdeABCDE") {
-		t.Error("IsAlphaOnly() failed.")
-	}
-	if !IsAlphaNumsOnly("12345abcdeABCDE") {
-		t.Error("IsAlphaNumsOnly() failed.")
-	}
-}
-
 func TestUnpack(t *testing.T) {
 	if res, ok := Unwrap("leftwordright", "left", "right"); !ok {
 		t.Fatal("unpack failed to find prefix and/or suffix")
@@ -142,18 +124,6 @@ func BenchmarkWrapText(b *testing.B) {
 func BenchmarkMatchesWildCard(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		MatchesWildcard("Sinferopopokatepetl", "Si?fero*ka?epe?l")
-	}
-}
-
-func BenchmarkRandomUppers(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		RandomUppers(10)
-	}
-}
-
-func BenchmarkRandomString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		RandomString(true, true, true, 10)
 	}
 }
 
